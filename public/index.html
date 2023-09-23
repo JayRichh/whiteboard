@@ -1,25 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Whiteboard</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="btn-container">
-    <button id="clear-btn" class="btn">Clear</button>
-    <button id="black-btn" class="btn">Black</button>
-    <button id="red-btn" class="btn">Red</button>
-    <button id="blue-btn" class="btn">Blue</button>
-    <button id="green-btn" class="btn">Green</button>
-    <input type="color" class="btn" id="color-picker" />
-  </div>
-  <div class="join-container">
-    <input type="text" id="share-code" placeholder="Enter Share Code">
-    <button id="join-btn">Join</button>
-  </div>
-  <canvas id="my-canvas" height="500" width="500"></canvas>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Whiteboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="header">
+      <div class="mode-container">
+        <button id="local-btn" class="underline-btn">Local</button>
+        <button id="collab-btn" class="underline-btn">Collaborative</button>
+        <button id="clash-btn" class="underline-btn">Color Clash</button>
+      </div>
+
+      <div id="clash-mode" style="display: none">
+        <div
+          id="prompt-guess-container"
+          style="
+            position: absolute;
+            top: 80px;
+            right: 10px;
+            color: #888;
+            font-size: 0.8em;
+            display: none;
+          "
+        >
+          <div id="prompt" style="display: none">
+            Prompt: <span id="drawing-prompt"></span>
+          </div>
+          <div id="guess" style="display: none">
+            Guess:
+            <input type="text" id="guess-input" placeholder="Your guess here" />
+            <button id="submit-guess-btn" class="btn">Submit Guess</button>
+          </div>
+          <div id="guesses" style="display: none">
+            Guesses:
+            <ul id="guesses-list"></ul>
+          </div>
+        </div>
+
+        <div id="play-container" style="display: none">
+          <button id="start-round-btn" class="btn">Start Round</button>
+        </div>
+
+        <div id="timer">Time Left: <span id="countdown">60</span></div>
+        <div id="score">Score: <span id="score-counter">0</span></div>
+        <div id="result"></div>
+        <div id="display-name-input" style="display: none">
+          Display Name:
+          <input type="text" id="display-name" placeholder="Your name here" />
+        </div>
+        <div id="players-list" style="display: none">
+          Players:
+          <ul id="players-names"></ul>
+        </div>
+        <div id="players-scores" style="display: none">
+          Scores:
+          <ul id="players-scores-list"></ul>
+        </div>
+      </div>
+
+      <div
+        id="connections"
+        style="
+          position: absolute;
+          top: -8px;
+          right: 10px;
+          color: #888;
+          font-size: 0.8em;
+          display: none;
+        "
+      >
+        Connections:
+      </div>
+      <code id="room-code" style="display: none"></code>
+      <div
+        id="room-code-display"
+        style="
+          position: absolute;
+          top: 20px;
+          right: 10px;
+          color: #888;
+          font-size: 0.8em;
+          display: none;
+        "
+      >
+        Room:
+        <span id="current-room-code"></span>
+      </div>
+      <div class="join-container" style="display: none">
+        <button id="create-room-btn" class="btn" style="display: none">
+          Create Room
+        </button>
+        <button id="join-room-btn" class="btn" style="display: none">
+          Join Room
+        </button>
+        <input
+          type="text"
+          id="connect-code"
+          placeholder="Connection Code"
+          style="display: none"
+          title="Type the code you received from a friend to connect to their whiteboard"
+        />
+        <input
+          type="text"
+          id="join-code"
+          placeholder="Join Code"
+          style="display: none"
+          title="Type a unique code to share with friends and collaborate on the same whiteboard"
+        />
+        <button class="btn" style="display: none" id="join-btn">Connect</button>
+      </div>
+    </div>
+    <div class="btn-container">
+      <button id="clear-btn" class="btn">Clear</button>
+      <button id="black-btn" class="btn">Black</button>
+      <button id="red-btn" class="btn">Red</button>
+      <button id="blue-btn" class="btn">Blue</button>
+      <button id="green-btn" class="btn">Green</button>
+      <input type="color" class="btn" id="color-picker" />
+    </div>
+    <canvas id="my-canvas" style="height: 100vh; width: 100vw"></canvas>
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>

@@ -1,27 +1,47 @@
-const express = require('express');
-const http = require('http');
-const socketIO = require('socket.io');
+const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const { join } = require("path");
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIO(server);
+const server = createServer(app);
+const io = new Server(server);
+let activeRooms = [];
 
-app.use(express.static('public'));
+app.use(express.static(join(__dirname, "public")));
 
-io.on('connection', (socket) => {
-  socket.on('join-room', (room) => {
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.on("join-room", (room) => {
     socket.join(room);
   });
 
-  socket.on('draw', (data) => {
-    socket.to(data.room).emit('draw', data);
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
   });
 
-  socket.on('clear', (room) => {
-    socket.to(room).emit('clear');
+  socket.on("create-room", (room) => {
+    if (activeRooms.includes(room)) {
+      socket.emit("error", { message: "Room already exists" });
+    } else {
+      activeRooms.push(room);
+      socket.join(room);
+    }
+  });
+
+  socket.on("error", (error) => {
+    console.log(error.message);
+  });
+
+  socket.on("draw", (data) => {
+    console.log("draw event received", data);
+  });
+
+  socket.on("clear", (room) => {
+    socket.to(room).emit("clear");
   });
 });
 
 server.listen(3000, () => {
-  console.log('http://localhost:3000');
+  console.log("server running at http://localhost:3000");
 });
