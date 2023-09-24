@@ -3,7 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <title>Whiteboard</title>
+    <link
+      rel="icon"
+      href="./icons/icons8-banana-48.png"
+      type="image/x-icon"
+      title="banananananana"
+    />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="reset.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A collaborative whiteboard for you and your friends to draw on"
+    />
   </head>
   <body>
     <div class="header">
@@ -38,6 +54,9 @@
             <ul id="guesses-list"></ul>
           </div>
         </div>
+        <div id="game-start" style="display: none">
+          <button id="game-start-btn" class="btn">Start Game</button>
+        </div>
 
         <div id="play-container" style="display: none">
           <button id="start-round-btn" class="btn">Start Round</button>
@@ -48,7 +67,12 @@
         <div id="result"></div>
         <div id="display-name-input" style="display: none">
           Display Name:
-          <input type="text" id="display-name" placeholder="Your name here" />
+          <input
+            type="text"
+            id="player-name-input"
+            placeholder="Your name here"
+          />
+          <button id="submit-name-btn" class="btn">Submit Name</button>
         </div>
         <div id="players-list" style="display: none">
           Players:
@@ -110,6 +134,7 @@
           title="Type a unique code to share with friends and collaborate on the same whiteboard"
         />
         <button class="btn" style="display: none" id="join-btn">Connect</button>
+        <
       </div>
     </div>
     <div class="btn-container">
@@ -119,10 +144,28 @@
       <button id="blue-btn" class="btn">Blue</button>
       <button id="green-btn" class="btn">Green</button>
       <input type="color" class="btn" id="color-picker" />
+      <input
+        type="range"
+        min="1"
+        max="50"
+        value="1"
+        class="slider"
+        id="stroke-size-slider"
+      />
+      <select id="stroke-type-dropdown">
+        <option value="solid">Solid</option>
+        <option value="dotted">Dotted</option>
+        <option value="dashed">Dashed</option>
+      </select>
     </div>
     <canvas id="my-canvas" style="height: 100vh; width: 100vw"></canvas>
     <!-- <script src="/socket.io/socket.io.js"></script> -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="app.js"></script>
+    <!-- <script src="app.js"></script> -->
+    <script type="module" src="elementReferences.js"></script>
+    <script type="module" src="socketEvents.js"></script>
+    <script type="module" src="gameLogic.js"></script>
+    <!-- <script type="module" src="main.js"></script> -->
+    <script type="module" defer src="eventListeners.js"></script>
   </body>
 </html>
