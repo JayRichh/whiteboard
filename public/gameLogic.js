@@ -37,7 +37,11 @@ let {
   roundActive,
   currentPrompt,
   guesses,
+  gameStartBtn,
+  strokeTypeDropdown,
 } = elementRefs;
+
+let players = [];
 
 let canvas = canvasElement;
 
@@ -46,6 +50,50 @@ export function init(e) {
   x1 = e.offsetX;
   y1 = e.offsetY;
   drawing = e.buttons === 1 ? true : false;
+}
+
+export function updateDisplayFromLocalStorage() {
+  const score = localStorage.getItem("score");
+  const playerName = localStorage.getItem("playerName");
+  const roomCode = localStorage.getItem("roomCode");
+  const mode = localStorage.getItem("mode");
+  const drawPoints = JSON.parse(localStorage.getItem("drawPoints"));
+  const strokeSize = localStorage.getItem("strokeSize");
+  const strokeColor = localStorage.getItem("strokeColor");
+  const strokeType = localStorage.getItem("strokeType");
+
+  if (score) scoreDisplay.textContent = score;
+  if (playerName) playerNameInput.value = playerName;
+  if (roomCode) joinCode.value = roomCode;
+  if (drawPoints) drawPoints.forEach((point) => drawWithColorAndStroke(point));
+  // if (strokeSize) strokeSizeSlider?.value = strokeSize;
+  if (strokeColor) colorPicker.value = strokeColor;
+  if (strokeType) strokeTypeDropdown.value = strokeType;
+
+  switchMode(mode);
+}
+
+export function switchMode(mode) {
+  const modeSwitch = {
+    local: switchToLocalMode,
+    collab: switchToCollabMode,
+    clash: switchToClashMode,
+  };
+
+  if (mode && modeSwitch[mode]) modeSwitch[mode]();
+}
+
+export function drawWithColorAndStroke(point) {
+  ctx.strokeStyle = point.color;
+  ctx.lineWidth = point.size;
+  ctx.lineCap = point.type;
+  ctx.lineJoin = point.type === "butt" ? "bevel" : "round";
+  draw(point);
+}
+
+export function joinRoomFromLocalStorage() {
+  const room = localStorage.getItem("room");
+  if (room) socket.emit("join-room", room);
 }
 
 function switchToClashMode() {
@@ -62,23 +110,25 @@ function switchToClashMode() {
 function switchToLocalMode() {
   mode = "local";
   localBtn.classList.add("active");
-  clashBtn.classList.remove("active");
   collabBtn.classList.remove("active");
-
+  clashBtn.classList.remove("active");
   createRoomBtn.style.display = "none";
   joinContainer.style.display = "none";
 
-  // Load local drawings before drawing them
-  loadLocalDrawings();
-
-  // Now draw the points
-  drawPoints.forEach((point) => drawOnCanvas(point));
-
-  // Ensure load from storage instantly when this called on dom load
-  document.addEventListener("DOMContentLoaded", function () {
-    loadLocalDrawings();
+  loadLocalDrawings().then(() => {
+    drawPoints.forEach((point) => drawOnCanvas(point));
   });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  if (mode === "local") {
+    localBtn?.classList.add("active");
+    loadLocalDrawings().then(() => {
+      drawPoints.forEach((point) => drawOnCanvas(point));
+    });
+  }
+});
 
 function switchToCollabMode() {
   mode = "collab";
@@ -103,6 +153,8 @@ export const draw = (e) => {
     x2: e.offsetX,
     y2: e.offsetY,
     color: ctx.strokeStyle,
+    size: ctx.lineWidth,
+    type: ctx.lineCap,
   };
   drawOnCanvas(point);
   if (mode === "local") {
@@ -115,7 +167,6 @@ export const draw = (e) => {
 };
 
 function drawOnCanvas(point) {
-  if (!drawing) return;
   ctx.beginPath();
   ctx.moveTo(point.x1, point.y1);
   ctx.lineTo(point.x2, point.y2);
@@ -225,17 +276,25 @@ function saveLocalDrawings() {
 }
 
 function loadLocalDrawings() {
-  const savedDrawPoints = JSON.parse(localStorage.getItem("drawPoints"));
-  if (savedDrawPoints) {
-    drawPoints = savedDrawPoints;
-    drawPoints.forEach((point) => draw(point));
-  }
+  return new Promise((resolve, reject) => {
+    const savedDrawPoints = JSON.parse(localStorage.getItem("drawPoints"));
+    if (savedDrawPoints) {
+      drawPoints = savedDrawPoints;
+      drawPoints.forEach((point) => {
+        ctx.strokeStyle = point.color;
+        draw(point);
+      });
+    }
 
-  if (drawPoints.length > 0) {
-    ctx.strokeStyle = drawPoints[drawPoints.length - 1].color;
-  }
+    if (drawPoints.length > 0) {
+      console.log(drawPoints[drawPoints.length - 1].color);
+      ctx.strokeStyle = drawPoints[drawPoints.length - 1].color;
+      resolve();
+    } else {
+      reject("No drawPoints found in local storage.");
+    }
+  });
 }
-
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -291,4 +350,5 @@ export {
   currentPrompt,
   guesses,
   scores,
+  players,
 };

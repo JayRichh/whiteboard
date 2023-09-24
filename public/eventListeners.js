@@ -12,8 +12,13 @@ import {
   joinRoom,
   startRound,
   endRound,
-  players,
+  updateDisplayFromLocalStorage,
+  joinRoomFromLocalStorage,
+  switchMode,
+  drawWithColorAndStroke
 } from "./gameLogic.js";
+
+let { players } = elementRefs;
 
 let {
   x1,
@@ -61,7 +66,6 @@ let {
   blueBtn,
   greenBtn,
   blackBtn,
-
 } = elementRefs;
 
 canvasElement.addEventListener("mousedown", (e) => {
@@ -85,7 +89,8 @@ canvasElement.addEventListener("mouseup", (e) => {
 clearBtn.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
   drawPoints = [];
-  saveLocalDrawings(); 
+  localStorage.removeItem("drawPoints");
+  saveLocalDrawings();
 });
 
 redBtn.addEventListener("click", () => {
@@ -124,6 +129,7 @@ guessBtn.addEventListener("click", () => {
 
 colorPicker.addEventListener("input", (e) => {
   ctx.strokeStyle = e.target.value;
+  localStorage.setItem("strokeColor", e.target.value);
 });
 
 gameStartBtn.addEventListener("click", startRound);
@@ -139,21 +145,26 @@ playerNameInput.addEventListener("input", (e) => {
 
 strokeSizeSlider.addEventListener("input", (e) => {
   ctx.lineWidth = e.target.value;
+  localStorage.setItem("strokeSize", e.target.value);
 });
 
 strokeTypeDropdown.addEventListener("change", (e) => {
   switch (e.target.value) {
-    case "solid":
-      ctx.setLineDash([]);
+    case "round":
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       break;
-    case "dotted":
-      ctx.setLineDash([1, 5]);
+    case "square":
+      ctx.lineCap = "butt";
+      ctx.lineJoin = "miter";
       break;
-    case "dashed":
-      ctx.setLineDash([5, 15]);
+    case "butt":
+      ctx.lineCap = "butt";
+      ctx.lineJoin = "bevel";
       break;
     default:
-      ctx.setLineDash([]);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       break;
   }
 });
@@ -169,12 +180,15 @@ window.addEventListener("updateScore", (e) => {
   localStorage.setItem("score", e.detail.score);
 });
 
-window.onload = function() {
-  mode = "local";
-  loadLocalDrawings();
-  players = [];
-  scores = {}
+window.onload = () => {
+  setTimeout(() => {
+    loadLocalDrawings();
+    updateDisplayFromLocalStorage();
+    joinRoomFromLocalStorage();
+  }, 100);
 };
+
+
 
 guessBtn.addEventListener("click", () => {
   const guess = guessInput.value;

@@ -21,6 +21,9 @@ socket.on("draw", (data) => {
     color: data.color,
   };
   drawOnCanvas(point);
+  if (roundActive) {
+    drawPoints.push(point);
+  }
 });
 
 socket.on("clear", () => {
