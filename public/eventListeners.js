@@ -1,91 +1,77 @@
 import * as elementRefs from "./elementReferences.js";
-
 import {
   init,
   draw,
   saveLocalDrawings,
   loadLocalDrawings,
-  switchToClashMode,
-  switchToLocalMode,
-  switchToCollabMode,
   createRoom,
   joinRoom,
   startRound,
   endRound,
-  updateDisplayFromLocalStorage,
-  joinRoomFromLocalStorage,
   switchMode,
-  drawWithColorAndStroke
-} from "./gameLogic.js";
+  drawWithColorAndStroke,
+} from "./main.js";
 
-let { players } = elementRefs;
+const colorToHex = {
+  red: "#ff0000",
+  blue: "#0000ff",
+  green: "#00ff00",
+  black: "#000000",
+};
 
 let {
-  x1,
-  y1,
-  ctx,
   canvasElement,
+  ctx,
   socket,
-  timer,
-  timerDisplay,
-  scoreDisplay,
-  playersList,
-  winnerDisplay,
-  guessesList,
   room,
-  currentPlayer,
-  scores,
-  mode,
-  drawPoints,
-  clashBtn,
-  localBtn,
-  collabBtn,
-  joinContainer,
-  createRoomBtn,
-  roomCode,
-  shareCode,
-  joinBtn,
-  drawing,
-  joinCode,
-  connectBtn,
-  connections,
   guessInput,
   guessBtn,
-  clearBtn,
-  colorPicker,
-  promptDisplay,
-  roundActive,
-  currentPrompt,
-  guesses,
+  strokeSizeSlider,
+  strokeTypeDropdown,
   gameStartBtn,
   gameEndBtn,
   playerNameInput,
-  strokeSizeSlider,
-  strokeTypeDropdown,
+  localBtn,
+  collabBtn,
+  clashBtn,
+  createRoomBtn,
+  joinBtn,
+  clearBtn,
   redBtn,
   blueBtn,
   greenBtn,
   blackBtn,
+  scores,
+  currentPlayer,
+  scoreDisplay,
+  promptDisplay,
+  winnerDisplay,
+  mode,
+  drawPoints,
+  joinContainer,
+  roomCode,
+  shareCode,
+  drawing,
+  joinCode,
+  connectBtn,
+  connections,
+  roundActive,
+  currentPrompt,
+  guesses,
+  colorPicker,
 } = elementRefs;
 
-canvasElement.addEventListener("mousedown", (e) => {
-  init(e);
-});
-
-canvasElement.addEventListener("mousemove", (e) => {
-  draw(e);
-});
-
-canvasElement.addEventListener("mouseup", (e) => {
+// Canvas Drawing
+canvasElement.addEventListener("mousedown", init);
+canvasElement.addEventListener("mousemove", draw);
+canvasElement.addEventListener("mouseup", () => {
   drawing = false;
-  console.log(mode);
-  console.log(drawing);
-
   if (mode === "local") {
     saveLocalDrawings();
   }
 });
 
+// Clear
 clearBtn.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
   drawPoints = [];
@@ -93,32 +79,52 @@ clearBtn.addEventListener("click", () => {
   saveLocalDrawings();
 });
 
+// Color
+colorPicker.onChange((color) => {
+  ctx.strokeStyle = color;
+  localStorage.setItem("color", color);
+});
 redBtn.addEventListener("click", () => {
-  ctx.strokeStyle = "#FF0000";
-  colorPicker.value = "#FF0000";
+  colorPicker.setColor("red");
+  ctx.strokeStyle = colorPicker.getHexString();
+  localStorage.setItem("color", colorPicker.getHexString());
 });
 
 blueBtn.addEventListener("click", () => {
-  ctx.strokeStyle = "#0000FF";
-  colorPicker.value = "#0000FF";
+  colorPicker.setColor("blue");
+  ctx.strokeStyle = colorPicker.getHexString();
+  localStorage.setItem("color", colorPicker.getHexString());
 });
 
 greenBtn.addEventListener("click", () => {
-  ctx.strokeStyle = "#00FF00";
-  colorPicker.value = "#00FF00";
+  colorPicker.setColor("green");
+  ctx.strokeStyle = colorPicker.getHexString();
+  localStorage.setItem("color", colorPicker.getHexString());
 });
 
 blackBtn.addEventListener("click", () => {
-  ctx.strokeStyle = "black";
-  colorPicker.value = "#000000";
+  colorPicker.setColor("black");
+  ctx.strokeStyle = colorPicker.getHexString();
+  localStorage.setItem("color", colorPicker.getHexString());
 });
 
-localBtn.addEventListener("click", switchToLocalMode);
-collabBtn.addEventListener("click", switchToCollabMode);
-clashBtn.addEventListener("click", switchToClashMode);
+strokeSizeSlider.addEventListener("change", () => {
+  ctx.lineWidth = strokeSizeSlider.value;
+  localStorage.setItem("strokeSize", strokeSizeSlider.value);
+});
 
+strokeTypeDropdown.addEventListener("change", () => {
+  ctx.lineCap = strokeTypeDropdown.value;
+  localStorage.setItem("strokeType", strokeTypeDropdown.value);
+});
+
+localBtn.addEventListener("click", () => switchMode("local"));
+collabBtn.addEventListener("click", () => switchMode("collab"));
+clashBtn.addEventListener("click", () => switchMode("clash"));
+
+// Room Creation and Joining
 createRoomBtn.addEventListener("click", createRoom);
-joinBtn.addEventListener("click", joinRoom);
+joinBtn.addEventListener("click", () => joinRoom(joinCode.value));
 
 guessBtn.addEventListener("click", () => {
   const guess = guessInput.value;
@@ -127,45 +133,14 @@ guessBtn.addEventListener("click", () => {
   }
 });
 
-colorPicker.addEventListener("input", (e) => {
-  ctx.strokeStyle = e.target.value;
-  localStorage.setItem("strokeColor", e.target.value);
-});
-
+// Game Start/End Logic
 gameStartBtn.addEventListener("click", startRound);
-
 gameEndBtn?.addEventListener("click", endRound);
 
 playerNameInput.addEventListener("input", (e) => {
   const playerName = e.target.value;
   if (playerName.trim() !== "") {
     socket.emit("updatePlayerName", { room, playerName });
-  }
-});
-
-strokeSizeSlider.addEventListener("input", (e) => {
-  ctx.lineWidth = e.target.value;
-  localStorage.setItem("strokeSize", e.target.value);
-});
-
-strokeTypeDropdown.addEventListener("change", (e) => {
-  switch (e.target.value) {
-    case "round":
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      break;
-    case "square":
-      ctx.lineCap = "butt";
-      ctx.lineJoin = "miter";
-      break;
-    case "butt":
-      ctx.lineCap = "butt";
-      ctx.lineJoin = "bevel";
-      break;
-    default:
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      break;
   }
 });
 
@@ -182,20 +157,47 @@ window.addEventListener("updateScore", (e) => {
 
 window.onload = () => {
   setTimeout(() => {
+    mode = localStorage.getItem("mode") || "local";
+    switchMode(mode);
     loadLocalDrawings();
-    updateDisplayFromLocalStorage();
-    joinRoomFromLocalStorage();
+    if (mode === "local") {
+      drawPoints.forEach((point) => drawWithColorAndStroke(point));
+
+      const savedStrokeColor = localStorage.getItem("strokeColor");
+      if (savedStrokeColor) {
+        ctx.strokeStyle = savedStrokeColor;
+        colorPicker.setColor(
+          savedStrokeColor.charAt(0) === "#"
+            ? savedStrokeColor
+            : colorToHex[savedStrokeColor],
+        );
+      }
+
+      const savedStrokeSize = localStorage.getItem("strokeSize");
+      if (savedStrokeSize) {
+        ctx.lineWidth = savedStrokeSize;
+        strokeSizeSlider.value = savedStrokeSize;
+      }
+
+      const savedStrokeType = localStorage.getItem("strokeType");
+      if (savedStrokeType) {
+        ctx.lineCap = savedStrokeType;
+        strokeTypeDropdown.value = savedStrokeType;
+      }
+
+      const savedPlayerName = localStorage.getItem("playerName");
+      if (savedPlayerName) {
+        socket.emit("updatePlayerName", { room, playerName: savedPlayerName });
+      }
+
+      const savedScore = localStorage.getItem("score");
+      if (savedScore) {
+        scores[currentPlayer] = savedScore;
+        scoreDisplay.textContent = scores[currentPlayer];
+      }
+    }
   }, 100);
 };
-
-
-
-guessBtn.addEventListener("click", () => {
-  const guess = guessInput.value;
-  if (guess.trim() !== "") {
-    socket.emit("submitGuess", { room, guess });
-  }
-});
 
 window.addEventListener("updatePrompt", (e) => {
   promptDisplay.textContent = e.detail.prompt;
@@ -209,7 +211,6 @@ window.addEventListener("updateWinner", (e) => {
   }
 });
 
-// Game Start/End Logic
 gameStartBtn.addEventListener("click", () => {
   socket.emit("startGame", { room });
 });
@@ -220,6 +221,3 @@ gameEndBtn?.addEventListener("click", () => {
 
 window.addEventListener("startRound", startRound);
 window.addEventListener("endRound", endRound);
-
-// Start on Play
-gameStartBtn.addEventListener("click", startRound);

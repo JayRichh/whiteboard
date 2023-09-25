@@ -11,10 +11,6 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="reset.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
@@ -134,7 +130,6 @@
           title="Type a unique code to share with friends and collaborate on the same whiteboard"
         />
         <button class="btn" style="display: none" id="join-btn">Connect</button>
-        <
       </div>
     </div>
     <div class="btn-container">
@@ -143,7 +138,7 @@
       <button id="red-btn" class="btn">Red</button>
       <button id="blue-btn" class="btn">Blue</button>
       <button id="green-btn" class="btn">Green</button>
-      <input type="color" class="btn" id="color-picker" />
+      <div id="color-picker"></div>
       <input
         type="range"
         min="1"
@@ -153,9 +148,9 @@
         id="stroke-size-slider"
       />
       <select id="stroke-type-dropdown">
-        <option value="solid">Solid</option>
-        <option value="dotted">Dotted</option>
-        <option value="dashed">Dashed</option>
+        <option value="round">Round</option>
+        <option value="square">Square</option>
+        <option value="butt">Butt</option>
       </select>
     </div>
     <canvas id="my-canvas" style="height: 100vh; width: 100vw"></canvas>
@@ -164,7 +159,7 @@
     <!-- <script src="app.js"></script> -->
     <script type="module" src="elementReferences.js"></script>
     <script type="module" src="socketEvents.js"></script>
-    <script type="module" src="gameLogic.js"></script>
+    <script type="module" src="main.js"></script>
     <!-- <script type="module" src="main.js"></script> -->
     <script type="module" defer src="eventListeners.js"></script>
   </body>
