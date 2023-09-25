@@ -3,6 +3,7 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const { join } = require("path");
 const crypto = require("crypto");
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 const server = createServer(app);
@@ -71,8 +72,12 @@ io.on("connection", (socket) => {
   socket.on("updatePlayerName", (data) => {
     socket.to(data.room).emit("updatePlayerName", data);
   });
+
+  app.get("/health", (req, res) => {
+    res.sendStatus(200);
+  });
 });
 
-server.listen(3000, () => {
-  console.log("server running at http://localhost:3000");
+server.listen(PORT, () => {
+  console.log(`server running at http://localhost:${PORT}`);
 });

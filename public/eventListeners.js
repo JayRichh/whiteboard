@@ -65,6 +65,21 @@ canvasElement.addEventListener("mouseup", () => {
     saveLocalDrawings();
   }
 });
+canvasElement.addEventListener("touchstart", (e) => {
+  const rect = canvasElement.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  const y = e.touches[0].clientY - rect.top;
+  startDrawing(x, y);
+});
+canvasElement.addEventListener("touchmove", (e) => {
+  const rect = canvasElement.getBoundingClientRect();
+  const x = e.touches[0].clientX - rect.left;
+  const y = e.touches[0].clientY - rect.top;
+  draw(x, y);
+});
+canvasElement.addEventListener("touchend", () => {
+  stopDrawing();
+});
 
 // Clear
 clearBtn.addEventListener("click", () => {
