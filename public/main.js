@@ -1,12 +1,5 @@
 import * as elementRefs from "./elementReferences.js";
 
-const colorToHex = {
-  red: "#FF0000",
-  blue: "#0000FF",
-  green: "#008000",
-  black: "#000000",
-};
-
 let {
   x1,
   y1,
@@ -71,7 +64,7 @@ const draw = (e) => {
     y1,
     x2: e.offsetX,
     y2: e.offsetY,
-    color: colorPicker.getHexString(),
+    color: colorPicker.getColor().toRGBA().toString(),
     size: ctx.lineWidth,
     type: ctx.lineCap,
   };
@@ -84,6 +77,12 @@ const draw = (e) => {
   }
   x1 = e.offsetX;
   y1 = e.offsetY;
+};
+
+export const setColorAndSave = (rgbaString) => {
+  colorPicker.setColor(rgbaString);
+  ctx.strokeStyle = rgbaString;
+  localStorage.setItem("color", rgbaString);
 };
 
 const drawWithColorAndStroke = (point) => {
@@ -119,10 +118,32 @@ const loadLocalDrawings = () => {
       const lastPointColor = drawPoints[drawPoints.length - 1].color;
       if (lastPointColor) {
         ctx.strokeStyle = lastPointColor;
-        colorPicker.value =
-          lastPointColor.charAt(0) === "#"
-            ? lastPointColor
-            : colorToHex[lastPointColor];
+        if (colorPicker) {
+          try {
+            if (
+              typeof lastPointColor === "string" &&
+              lastPointColor.startsWith("rgba")
+            ) {
+              colorPicker.setColor(lastPointColor);
+            } else if (
+              typeof lastPointColor === "object" &&
+              lastPointColor.hasOwnProperty("h") &&
+              lastPointColor.hasOwnProperty("s") &&
+              lastPointColor.hasOwnProperty("v") &&
+              lastPointColor.hasOwnProperty("a")
+            ) {
+              colorPicker.setColor(
+                `hsva(${lastPointColor.h}, ${lastPointColor.s}, ${lastPointColor.v}, ${lastPointColor.a})`,
+              );
+            } else {
+              console.error("Invalid color format: ", lastPointColor);
+            }
+          } catch (error) {
+            console.error("Error setting colorPicker color: ", error);
+          }
+        } else {
+          console.error("colorPicker is not initialized");
+        }
       }
       resolve();
     } else {
@@ -135,32 +156,35 @@ const updateDisplayFromLocalStorage = () => {
   const playerName = localStorage.getItem("playerName");
   const roomCode = localStorage.getItem("roomCode");
   const drawPoints = JSON.parse(localStorage.getItem("drawPoints"));
-  const color = localStorage.getItem("color");
   const strokeType = localStorage.getItem("strokeType");
   const strokeSize = localStorage.getItem("strokeSize");
-
-  if (color) colorPicker.setColor(localStorage.getItem("color"));
+  const savedColor = localStorage.getItem("color");
   if (score) scoreDisplay.textContent = score;
   if (playerName) playerNameInput.value = playerName;
   if (roomCode) joinCode.value = roomCode;
   if (mode) switchMode(localStorage.getItem("mode"));
   if (drawPoints) drawPoints.forEach((point) => drawWithColorAndStroke(point));
-  if (color) {
+  if (savedColor) {
+    if (colorPicker) {
+      colorPicker.setColor(savedColor);
+    } else {
+      console.error("colorPicker is not initialized");
+    }
+    ctx.strokeStyle = savedColor;
     [redBtn, blueBtn, greenBtn, blackBtn].forEach((btn) =>
       btn.classList.remove("active"),
     );
-
-    switch (color) {
-      case "red":
+    switch (savedColor) {
+      case "rgba(255, 0, 0, 1)":
         redBtn.classList.add("active");
         break;
-      case "blue":
+      case "rgba(0, 0, 255, 1)":
         blueBtn.classList.add("active");
         break;
-      case "green":
+      case "rgba(0, 128, 0, 1)":
         greenBtn.classList.add("active");
         break;
-      case "black":
+      case "rgba(0, 0, 0, 1)":
         blackBtn.classList.add("active");
         break;
     }

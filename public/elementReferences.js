@@ -1,5 +1,3 @@
-import * as SimpleColorPicker from "../../node_modules/simple-color-picker/dist/simple-color-picker.umd.js";
-
 // Canvas
 export let canvasElement = document.querySelector("#my-canvas");
 export let ctx = canvasElement.getContext("2d");
@@ -24,13 +22,42 @@ export let gameStartBtn = document.querySelector("#game-start-btn");
 export let gameEndBtn = document.querySelector("#game-end-btn");
 
 // Input
-export let colorPicker = new ColorPicker({
-  color: localStorage.getItem("color") || "#FF0000",
-  el: document.querySelector("#color-picker"),
+export let colorPicker = new Pickr({
+  el: "#color-picker",
+  theme: "classic",
+  default: localStorage.getItem("color") || "#000000",
+  swatches: [
+    "rgba(244, 67, 54, 1)",
+    "rgba(233, 30, 99, 0.95)",
+    "rgba(156, 39, 176, 0.9)",
+    "rgba(103, 58, 183, 0.85)",
+    "rgba(63, 81, 181, 0.8)",
+    "rgba(33, 150, 243, 0.75)",
+    "rgba(3, 169, 244, 0.7)",
+    "rgba(0, 188, 212, 0.7)",
+    "rgba(0, 150, 136, 0.75)",
+    "rgba(76, 175, 80, 0.8)",
+    "rgba(139, 195, 74, 0.85)",
+    "rgba(205, 220, 57, 0.9)",
+    "rgba(255, 235, 59, 0.95)",
+    "rgba(255, 193, 7, 1)",
+  ],
+  components: {
+    preview: true,
+    opacity: true,
+    hue: true,
+    interaction: {
+      hex: true,
+      rgba: true,
+      hsla: false,
+      hsva: false,
+      cmyk: false,
+      input: true,
+      clear: false,
+      save: true,
+    },
+  },
 });
-colorPicker.el.style.width = "200px";
-colorPicker.el.style.height = "200px";
-colorPicker.window = document.getElementsByTagName("iframe")[0].contentWindow;
 export let shareCode = document.querySelector("#connect-code");
 export let joinCode = document.querySelector("#join-code");
 export let guessInput = document.querySelector("#guess-input");

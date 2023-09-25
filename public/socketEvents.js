@@ -32,7 +32,11 @@ socket.on("draw", (data) => {
     color: data.color,
   };
   drawOnCanvas(point);
-  colorPicker.setColor(data.color);
+  if (colorPicker) {
+    colorPicker.setColor(data.color);
+  } else {
+    console.error("colorPicker is not initialized");
+  }
 });
 
 socket.on("clear", () => {
