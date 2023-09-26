@@ -113,28 +113,57 @@
         Room:
         <span id="current-room-code"></span>
       </div>
-      <div class="join-container" style="display: none">
-        <button id="create-room-btn" class="btn" style="display: none">
+      <div
+        class="join-container"
+        style="
+          display: none;
+          background-color: #f2f2f2;
+          padding: 10px;
+          border-radius: 5px;
+        "
+      >
+        <button
+          id="create-room-btn"
+          class="btn"
+          style="display: none; margin-bottom: 10px"
+        >
           Create Room
-        </button>
-        <button id="join-room-btn" class="btn" style="display: none">
-          Join Room
         </button>
         <input
           type="text"
           id="connect-code"
           placeholder="Connection Code"
-          style="display: none"
+          style="display: none; margin-bottom: 10px"
           title="Type the code you received from a friend to connect to their whiteboard"
         />
+        <button
+          class="btn"
+          style="display: none; margin-bottom: 10px"
+          id="connect-btn"
+        >
+          Connect
+        </button>
+        <button
+          id="join-room-btn"
+          class="btn"
+          style="display: none; margin-bottom: 10px"
+        >
+          Join Room
+        </button>
         <input
           type="text"
           id="join-code"
           placeholder="Join Code"
-          style="display: none"
+          style="display: none; margin-bottom: 10px"
           title="Type a unique code to share with friends and collaborate on the same whiteboard"
         />
-        <button class="btn" style="display: none" id="join-btn">Connect</button>
+        <button
+          class="btn"
+          style="display: none; margin-bottom: 10px"
+          id="join-btn"
+        >
+          Join
+        </button>
       </div>
     </div>
     <div class="btn-container">

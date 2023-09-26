@@ -84,9 +84,10 @@ canvasElement.addEventListener("touchend", () => {
 // Clear
 clearBtn.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  localStorage.setItem("drawPoints", JSON.stringify([]));
   drawPoints = [];
-  localStorage.removeItem("drawPoints");
-  saveLocalDrawings();
+  localStorage.clear();
+  // saveLocalDrawings();
 });
 
 // Color
@@ -115,6 +116,7 @@ strokeTypeDropdown.addEventListener("change", () => {
 
 window.onload = () => {
   mode = localStorage.getItem("mode") || "local";
+  drawPoints?.forEach((point) => drawWithColorAndStroke(point));
   switchMode(mode);
   loadLocalDrawings();
   updateDisplayFromLocalStorage();
@@ -205,9 +207,65 @@ collabBtn.addEventListener("click", () => switchMode("collab"));
 clashBtn.addEventListener("click", () => switchMode("clash"));
 
 // Room Creation and Joining
-createRoomBtn.addEventListener("click", createRoom);
-joinBtn.addEventListener("click", () => joinRoom(joinCode.value));
-
+createRoomBtn.addEventListener("click", () => {
+  createRoom();
+  const connectCode = document.querySelector("#connect-code");
+  connectCode.style.display = connectCode.style.display === "none" ? "block" : "none";
+  connectCode.style.transition = "display 0.5s";
+});
+joinBtn.addEventListener("click", () => {
+  joinRoom();
+  const joinCode = document.querySelector("#join-code");
+  joinCode.style.display = joinCode.style.display === "none" ? "block" : "none";
+  joinCode.style.transition = "display 0.5s";
+});
+shareCode.addEventListener("keyup", () => {
+  const connectBtn = document.querySelector("#connect-btn");
+  connectBtn.style.display = shareCode.value.length > 1 ? "block" : "none";
+  connectBtn.style.transition = "display 0.5s";
+  if (shareCode.value.length >= 0) {
+    joinCode.style.display = "none";
+    document.querySelector('#join-btn').style.display = "none";
+  }
+});
+joinCode.addEventListener("keyup", () => {
+  const joinBtn = document.querySelector("#join-btn");
+  joinBtn.style.display = joinCode.value.length > 1 ? "block" : "none";
+  joinBtn.style.transition = "display 0.5s";
+  if (joinCode.value.length >= 0) {
+    shareCode.style.display = "none";
+    document.querySelector('#connect-btn').style.display = "none";
+  }
+});
+document.querySelector('#connect-btn').addEventListener("click", () => {
+  const connectCode = document.querySelector("#connect-code");
+  console.log(connectCode.value); 
+  if (connectCode.value.length > 1) {
+    try {
+      createRoom();
+      connectCode.style.display = "none";
+      connectBtn.style.display = "none";
+      document.querySelector('#create-btn').style.display = "none";
+    } catch (error) {
+      console.warn("Failed to create room: ", error);
+    }
+  }
+});
+document.querySelector('#join-btn').addEventListener("click", () => {
+  const joinCode = document.querySelector("#join-code");
+  console.log(joinCode.value)
+  if (joinCode.value.length > 1) {
+    try {
+      console.log("join room")
+      joinRoom();
+      joinCode.style.display = "none";
+      joinBtn.style.display = "none";
+      document.querySelector('#join-btn').style.display = "none";
+    } catch (error) {
+      console.warn("Failed to join room: ", error);
+    }
+  }
+});
 guessBtn.addEventListener("click", () => {
   const guess = guessInput.value;
   if (guess.trim() !== "") {
@@ -244,6 +302,7 @@ window.addEventListener("updatePrompt", (e) => {
 window.addEventListener("updateWinner", (e) => {
   winnerDisplay.textContent = e.detail.winner;
   if (!e.detail.winner) {
+    // Decrease score
     scores[currentPlayer]--;
     scoreDisplay.textContent = scores[currentPlayer];
   }

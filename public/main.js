@@ -85,172 +85,139 @@ export const setColorAndSave = (rgbaString) => {
   localStorage.setItem("color", rgbaString);
 };
 
-const drawWithColorAndStroke = (point) => {
+const drawWithColorAndStroke = ({ x1, y1, x2, y2, color, size, type }) => {
   ctx.beginPath();
-  ctx.moveTo(point.x1, point.y1);
-  ctx.lineTo(point.x2, point.y2);
-  ctx.strokeStyle = point.color;
-  ctx.lineWidth = point.size;
-  ctx.lineCap = point.type;
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size;
+  ctx.lineCap = type;
   ctx.stroke();
   ctx.closePath();
 };
 
 const drawOnCanvas = (point) => {
-  ctx.beginPath();
-  ctx.moveTo(point.x1, point.y1);
-  ctx.lineTo(point.x2, point.y2);
-  ctx.strokeStyle = point.color;
-  ctx.lineWidth = point.size;
-  ctx.lineCap = point.type;
-  ctx.stroke();
-  ctx.closePath();
+  drawWithColorAndStroke(point);
+  if (drawPoints.length > 1000) drawPoints.shift();
+  drawPoints.push(point);
 };
+
 const clearCanvas = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
-const saveLocalDrawings = () =>
-  localStorage.setItem("drawPoints", JSON.stringify(drawPoints));
-const loadLocalDrawings = () => {
-  return new Promise((resolve, reject) => {
-    const savedDrawPoints = JSON.parse(localStorage.getItem("drawPoints"));
-    if (savedDrawPoints && savedDrawPoints.length > 0) {
-      drawPoints = savedDrawPoints;
-      drawPoints.forEach((point) => drawOnCanvas(point));
-      const lastPointColor = drawPoints[drawPoints.length - 1].color;
-      if (lastPointColor) {
-        ctx.strokeStyle = lastPointColor;
-        if (colorPicker) {
-          try {
-            if (
-              typeof lastPointColor === "string" &&
-              lastPointColor.startsWith("rgba")
-            ) {
-              colorPicker.setColor(lastPointColor);
-            } else if (
-              typeof lastPointColor === "object" &&
-              lastPointColor.hasOwnProperty("h") &&
-              lastPointColor.hasOwnProperty("s") &&
-              lastPointColor.hasOwnProperty("v") &&
-              lastPointColor.hasOwnProperty("a")
-            ) {
-              colorPicker.setColor(
-                `hsva(${lastPointColor.h}, ${lastPointColor.s}, ${lastPointColor.v}, ${lastPointColor.a})`,
-              );
-            } else {
-              console.error("Invalid color format: ", lastPointColor);
-            }
-          } catch (error) {
-            console.error("Error setting colorPicker color: ", error);
-          }
-        } else {
-          console.error("colorPicker is not initialized");
-        }
-      }
-      resolve();
-    } else {
-      reject("No drawPoints found in local storage.");
-    }
-  });
+
+const saveLocalDrawings = () => {
+  if (drawPoints.length > 0)
+    localStorage.setItem("drawPoints", JSON.stringify(drawPoints));
 };
+
+const loadLocalDrawings = async () => {
+  const savedDrawPoints = JSON.parse(localStorage.getItem("drawPoints"));
+  if (savedDrawPoints && savedDrawPoints.length > 0) {
+    drawPoints = savedDrawPoints;
+    drawPoints.forEach(drawOnCanvas);
+    const lastPointColor = drawPoints[drawPoints.length - 1].color;
+    if (lastPointColor) {
+      ctx.strokeStyle = lastPointColor;
+      if (colorPicker) colorPicker.setColor(lastPointColor);
+    }
+  }
+};
+
 const updateDisplayFromLocalStorage = () => {
-  const score = localStorage.getItem("score");
-  const playerName = localStorage.getItem("playerName");
-  const roomCode = localStorage.getItem("roomCode");
-  const drawPoints = JSON.parse(localStorage.getItem("drawPoints"));
-  const strokeType = localStorage.getItem("strokeType");
-  const strokeSize = localStorage.getItem("strokeSize");
-  const savedColor = localStorage.getItem("color");
+  const [
+    score,
+    playerName,
+    roomCode,
+    drawPoints,
+    strokeType,
+    strokeSize,
+    savedColor,
+  ] = [
+    "score",
+    "playerName",
+    "roomCode",
+    "drawPoints",
+    "strokeType",
+    "strokeSize",
+    "color",
+  ].map((item) => localStorage.getItem(item));
+
   if (score) scoreDisplay.textContent = score;
   if (playerName) playerNameInput.value = playerName;
   if (roomCode) joinCode.value = roomCode;
   if (mode) switchMode(localStorage.getItem("mode"));
-  if (drawPoints) drawPoints.forEach((point) => drawWithColorAndStroke(point));
+  if (drawPoints) JSON.parse(drawPoints).forEach(drawWithColorAndStroke);
   if (savedColor) {
-    if (colorPicker) {
-      colorPicker.setColor(savedColor);
-    } else {
-      console.error("colorPicker is not initialized");
-    }
+    if (colorPicker) colorPicker.setColor(savedColor);
     ctx.strokeStyle = savedColor;
     [redBtn, blueBtn, greenBtn, blackBtn].forEach((btn) =>
       btn.classList.remove("active"),
     );
-    switch (savedColor) {
-      case "rgba(255, 0, 0, 1)":
-        redBtn.classList.add("active");
-        break;
-      case "rgba(0, 0, 255, 1)":
-        blueBtn.classList.add("active");
-        break;
-      case "rgba(0, 128, 0, 1)":
-        greenBtn.classList.add("active");
-        break;
-      case "rgba(0, 0, 0, 1)":
-        blackBtn.classList.add("active");
-        break;
-    }
+    const colorBtns = {
+      "rgba(255, 0, 0, 1)": redBtn,
+      "rgba(0, 0, 255, 1)": blueBtn,
+      "rgba(0, 128, 0, 1)": greenBtn,
+      "rgba(0, 0, 0, 1)": blackBtn,
+    };
+    if (colorBtns[savedColor]) colorBtns[savedColor].classList.add("active");
   }
-
-  if (strokeType) {
-    strokeTypeDropdown.value = strokeType;
-  }
-
-  if (strokeSize) {
-    strokeSizeSlider.value = strokeSize;
-  }
+  if (strokeType) strokeTypeDropdown.value = strokeType;
+  if (strokeSize) strokeSizeSlider.value = strokeSize;
 };
 
 // GAME LOGIC
-const switchToLocalMode = async () => {
-  mode = "local";
-  localBtn.classList.add("active");
-  collabBtn.classList.remove("active");
-  clashBtn.classList.remove("active");
-  createRoomBtn.style.display = "none";
-  joinContainer.style.display = "none";
-  await loadLocalDrawings().then(() => {
-    drawPoints.forEach((point) => drawWithColorAndStroke(point));
-  });
-};
-
-const switchToCollabMode = () => {
-  mode = "collab";
-  drawPoints = [];
-  collabBtn.classList.add("active");
-  clashBtn.classList.remove("active");
-  localBtn.classList.remove("active");
-  connectBtn.style.display = "block";
-  createRoomBtn.style.display = "block";
-  roomCode.style.display = "block";
-  clearCanvas();
-  joinContainer.style.display = "block";
-};
-
-const switchToClashMode = () => {
-  mode = "clash";
-  drawPoints = [];
-  clashBtn.classList.add("active");
-  localBtn.classList.remove("active");
-  collabBtn.classList.remove("active");
-  createRoomBtn.style.display = "block";
-  clearCanvas();
-  joinContainer.style.display = "block";
-};
-
 const switchMode = (newMode) => {
   const modeSwitch = {
-    local: switchToLocalMode,
-    collab: switchToCollabMode,
-    clash: switchToClashMode,
+    local: async () => {
+      mode = "local";
+      localBtn.classList.add("active");
+      [collabBtn, clashBtn].forEach((btn) => btn.classList.remove("active"));
+      createRoomBtn.style.display = "none";
+      joinContainer.style.display = "none";
+      await loadLocalDrawings();
+      drawPoints.forEach(drawWithColorAndStroke);
+    },
+    collab: () => {
+      mode = "collab";
+      drawPoints = [];
+      collabBtn.classList.add("active");
+      [localBtn, clashBtn].forEach((btn) => btn.classList.remove("active"));
+      [connectBtn, createRoomBtn, roomCode].forEach(
+        (item) => (item.style.display = "block"),
+      );
+      clearCanvas();
+      joinContainer.style.display = "block";
+    },
+    clash: () => {
+      mode = "clash";
+      drawPoints = [];
+      clashBtn.classList.add("active");
+      [localBtn, collabBtn].forEach((btn) => btn.classList.remove("active"));
+      createRoomBtn.style.display = "block";
+      clearCanvas();
+      joinContainer.style.display = "block";
+    },
   };
   if (newMode && modeSwitch[newMode]) modeSwitch[newMode]();
 };
 
 const createRoom = () => {
-  socket.emit("createRoom");
+  const roomCodeElement = document.querySelector("#create-room-code");
+  if (roomCodeElement) {
+    const roomCode = roomCodeElement.value;
+    if (roomCode && roomCode.length > 1) {
+      socket.emit("createRoom", roomCode);
+    }
+  }
 };
 
-const joinRoom = (roomCode) => {
-  socket.emit("joinRoom", roomCode);
+const joinRoom = () => {
+  const roomCodeElement = document.querySelector("#join-room-code");
+  if (roomCodeElement) {
+    const roomCode = roomCodeElement.value;
+    if (roomCode && roomCode.length > 1) {
+      socket.emit("joinRoom", roomCode);
+    }
+  }
 };
 
 const startRound = () => {
@@ -361,9 +328,6 @@ export {
   room,
   mode,
   loadLocalDrawings,
-  switchToClashMode,
-  switchToLocalMode,
-  switchToCollabMode,
   createRoom,
   joinRoom,
   startRound,
