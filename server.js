@@ -18,6 +18,12 @@ app.use(express.json());
 
 io.on("connection", (socket) => {
   console.log("a user connected");
+
+  socket.on("draw", (data) => {
+    console.log("draw event received", data);
+    socket.to(data.room).emit("draw", data);
+  });
+
   socket.on("join-room", (room) => {
     socket.join(room);
     if (!players[room]) {
@@ -35,22 +41,27 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("create-room", (room) => {
+  socket.on("createRoom", (room) => {
     if (activeRooms.includes(room)) {
       socket.emit("error", { message: "Room already exists" });
     } else {
       activeRooms.push(room);
       socket.join(room);
+      socket.emit("roomCreated", { room });
+    }
+  });
+
+  socket.on("joinRoom", (room) => {
+    if (activeRooms.includes(room)) {
+      socket.join(room);
+      socket.emit("roomJoined", { room });
+    } else {
+      socket.emit("error", { message: "Room does not exist" });
     }
   });
 
   socket.on("error", (error) => {
     console.log(error.message);
-  });
-
-  socket.on("draw", (data) => {
-    console.log("draw event received", data);
-    socket.to(data.room).emit("draw", data);
   });
 
   socket.on("clear", (room) => {

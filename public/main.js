@@ -51,6 +51,16 @@ let {
 let players = [];
 let canvas = canvasElement;
 
+socket.on("roomCreated", (data) => {
+  console.log(`Room ${data.room} created.`);
+  room = data.room;
+});
+
+socket.on("roomJoined", (data) => {
+  console.log(`Joined room ${data.room}.`);
+  room = data.room;
+});
+
 const init = (e) => {
   x1 = e.offsetX;
   y1 = e.offsetY;
@@ -206,6 +216,7 @@ const createRoom = () => {
     const roomCode = roomCodeElement.value;
     if (roomCode && roomCode.length > 1) {
       socket.emit("createRoom", roomCode);
+      room = roomCode;
     }
   }
 };
@@ -216,6 +227,7 @@ const joinRoom = () => {
     const roomCode = roomCodeElement.value;
     if (roomCode && roomCode.length > 1) {
       socket.emit("joinRoom", roomCode);
+      room = roomCode;
     }
   }
 };

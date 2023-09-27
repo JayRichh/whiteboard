@@ -87,25 +87,28 @@ canvasElement.addEventListener("touchend", () => {
 });
 
 // Utilities Popout
-utilitiesBtn.addEventListener("click", () => {
-  let utilitiesPopout = document.getElementById("utilities-popout");
-  utilitiesPopout.classList.toggle('active');
-  let utilityButtons = utilitiesPopout.querySelectorAll(".btn");
-  utilityButtons.forEach((button) => {
-    button.style.display = utilitiesPopout.classList.contains('active') ? "block" : "none";
-  });
-});
+
+// utilitiesBtn.addEventListener("click", () => {
+//   let utilitiesPopout = document.querySelector(".utilities-container");
+//   utilitiesPopout.classList.toggle("active");
+//   let utilityButtons = utilitiesPopout.querySelectorAll(".btn");
+//   utilityButtons.forEach((button) => {
+//     button.style.display = utilitiesPopout.classList.contains("active")
+//       ? "block"
+//       : "none";
+//   });
+// });
 // click away from popout
-window.addEventListener("click", function (e) {
-  if (!document.getElementById("utilities-popout").contains(e.target)) {
-    let utilitiesPopout = document.getElementById("utilities-popout");
-    utilitiesPopout.classList.remove('active');
-    let utilityButtons = utilitiesPopout.querySelectorAll(".btn");
-    utilityButtons.forEach((button) => {
-      button.style.display = "none";
-    });
-  }
-});
+// window.addEventListener("click", function (e) {
+//   if (!document.querySelector(".utilities-container").contains(e.target)) {
+//     let utilitiesPopout = document.querySelector(".utilities-container");
+//     utilitiesPopout.classList.remove("active");
+//     let utilityButtons = utilitiesPopout.querySelectorAll(".btn");
+//     utilityButtons.forEach((button) => {
+//       button.style.display = "none";
+//     });
+//   }
+// });
 
 // Undo/Redo
 let undoStack = [];
@@ -121,7 +124,7 @@ undoBtn.addEventListener("click", () => {
   redoBtn.innerHTML = "Redo";
   clearBtn.innerHTML = "Clear";
   eraseBtn.innerHTML = "Eraser";
-  document.getElementById("utilities-popout").classList.remove('active');
+  document.querySelector(".utilities-container").classList.remove("active");
 });
 
 redoBtn.addEventListener("click", () => {
@@ -134,7 +137,7 @@ redoBtn.addEventListener("click", () => {
   undoBtn.innerHTML = "Undo";
   clearBtn.innerHTML = "Clear";
   eraseBtn.innerHTML = "Eraser";
-  document.getElementById("utilities-popout").classList.remove('active');
+  document.querySelector(".utilities-container").classList.remove("active");
 });
 
 clearBtn.addEventListener("click", () => {
@@ -147,7 +150,7 @@ clearBtn.addEventListener("click", () => {
   undoBtn.innerHTML = "Undo";
   redoBtn.innerHTML = "Redo";
   eraseBtn.innerHTML = "Eraser";
-  document.getElementById("utilities-popout").classList.remove('active');
+  document.querySelector(".utilities-container").classList.remove("active");
 });
 
 eraseBtn?.addEventListener("click", () => {
@@ -158,7 +161,7 @@ eraseBtn?.addEventListener("click", () => {
   undoBtn.innerHTML = "Undo";
   redoBtn.innerHTML = "Redo";
   clearBtn.innerHTML = "Clear";
-  document.getElementById("utilities-popout").classList.remove('active');
+  document.querySelector(".utilities-container").classList.remove("active");
 });
 
 // Clear
@@ -419,3 +422,39 @@ gameEndBtn?.addEventListener("click", () => {
 
 window.addEventListener("startRound", startRound);
 window.addEventListener("endRound", endRound);
+
+let utilitiesMenu = document.querySelector("#utilities-popout");
+// WINDOW EVENTS
+window.addEventListener("click", function (e) {
+  if (
+    !document.querySelector(".utilities-container").contains(e.target) &&
+    !e.target.classList.contains("utility-option") &&
+    e.target.id !== "utilities-btn" 
+  ) {
+    utilitiesMenu.style.display = "none";
+    utilityOptions.forEach((option) => {
+      option.style.display = "none";
+    });
+  }
+});
+
+// let utilitiesBtn = document.querySelector("#utilities-btn");
+utilitiesBtn.addEventListener("click", () => {
+  let utilityOptions = document.querySelector(".utility-options");
+  if (utilitiesMenu.style.display === "none") {
+    utilitiesMenu.style.display = "block";
+    utilityOptions.style.transform = "scale(1)";
+  } else {
+    utilitiesMenu.style.display = "none";
+    utilityOptions.style.transform = "scale(0)";
+  }
+});
+
+// let utilityOptions = document.querySelectorAll(".utility-option");
+
+// utilityOptions.forEach((option) => {
+//   option.addEventListener("click", () => {
+//     utilitiesBtn.textContent = option.textContent;
+//     utilitiesMenu.style.display = "none";
+//   });
+// });
