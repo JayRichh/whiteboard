@@ -7,17 +7,18 @@
   transform: translate(0%, -50%);
   background: white;
   border-radius: 0 10px 10px 0;
-  padding: 0 0px 0px 0px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  padding: 10px;
 }
 
 .btn {
   background: white;
   outline: 1px solid #333;
-  height: 40px;
-  width: 80px;
+  height: 60px;
+  width: min(100%, 300px);
   border: none;
   cursor: pointer;
+  font-size: 1.5em;
+  margin-bottom: 10px;
 }
 
 .btn.active {
@@ -26,6 +27,41 @@
 
 .btn:hover {
   font-weight: bold;
+}
+
+.btn-container .btn-group {
+  display: grid;
+  margin: 20px 0;
+  grid-template-columns: auto auto auto;
+  grid-gap: 10px;
+}
+
+.btn-container .btn-group .btn {
+  background: white;
+  outline: 1px solid #333;
+  height: 40px;
+  width: min(100%, 200px);
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  margin-right: 5px;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  font:
+    20px "Monospace",
+    Arial,
+    sans-serif;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #333;
+  border-radius: 2px;
+}
+.slider:hover {
+  opacity: 1;
 }
 
 .mt-2 {
@@ -72,51 +108,82 @@
 
 .join-container {
   position: fixed;
-  top: 0;
-  left: 0;
+  width: 100%;
+  top: 10rem;
+  left: 1.5rem;
   transform: translate(0, 0);
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-gap: 10px;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
 }
 
-.join-container .btn {
+.join-container .btn-group {
+  display: grid;
+  margin: 20px 0;
+  grid-template-columns: auto auto auto;
+  grid-gap: 10px;
+}
+
+.join-container .btn-group .btn {
   background: white;
   outline: 1px solid #333;
   height: 40px;
-  width: 100px;
+  width: min(100%, 200px);
   border: none;
   cursor: pointer;
+  font-size: 1.2em;
+  margin-right: 5px;
 }
 
-.join-container .btn:hover {
+.join-container .btn-group .btn:hover {
   font-weight: bold;
 }
 
-.join-container input {
+.join-container .btn-group input {
   height: 40px;
   padding: 0 10px;
   border: 1px solid #333;
 }
-.mode-container button {
-  width: 100px;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: lightgray;
-  cursor: pointer;
-}
 
+.mode-container button {
+  background: white;
+  outline: 1px solid #333;
+  height: 60px;
+  width: min(100%, 300px);
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
 .mode-container button.active {
-  background-color: darkgray;
+  border: 1px solid #000;
+  position: relative;
+}
+.mode-container button.active:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  z-index: -1;
+  background: linear-gradient(45deg, #52bcba, #f5a553, #3575b3, #061a34);
+  background-size: 200% 200%;
+  opacity: 0.7;
+  animation: gradient 3s linear infinite;
+}
+@keyframes gradient {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
 }
 .mode-container button:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-  transition: all 0.5s cubic-bezier(0.25, 0.45, 0.45, 0.95);
-}
-.mode-container button:not(:hover) {
-  transition: all 0.5s cubic-bezier(0.25, 0.45, 0.45, 0.95);
+  font-weight: bold;
 }
 
 .header {

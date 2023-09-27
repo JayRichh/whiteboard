@@ -15,6 +15,7 @@ import {
 } from "./main.js";
 
 let {
+  utilSelected,
   canvasElement,
   ctx,
   socket,
@@ -54,6 +55,10 @@ let {
   currentPrompt,
   guesses,
   colorPicker,
+  eraseBtn,
+  undoBtn,
+  redoBtn,
+  utilitiesBtn,
 } = elementRefs;
 
 // Canvas Drawing
@@ -79,6 +84,81 @@ canvasElement.addEventListener("touchmove", (e) => {
 });
 canvasElement.addEventListener("touchend", () => {
   stopDrawing();
+});
+
+// Utilities Popout
+utilitiesBtn.addEventListener("click", () => {
+  let utilitiesPopout = document.getElementById("utilities-popout");
+  utilitiesPopout.classList.toggle('active');
+  let utilityButtons = utilitiesPopout.querySelectorAll(".btn");
+  utilityButtons.forEach((button) => {
+    button.style.display = utilitiesPopout.classList.contains('active') ? "block" : "none";
+  });
+});
+// click away from popout
+window.addEventListener("click", function (e) {
+  if (!document.getElementById("utilities-popout").contains(e.target)) {
+    let utilitiesPopout = document.getElementById("utilities-popout");
+    utilitiesPopout.classList.remove('active');
+    let utilityButtons = utilitiesPopout.querySelectorAll(".btn");
+    utilityButtons.forEach((button) => {
+      button.style.display = "none";
+    });
+  }
+});
+
+// Undo/Redo
+let undoStack = [];
+let redoStack = [];
+
+undoBtn.addEventListener("click", () => {
+  if (drawPoints.length) {
+    redoStack.push(drawPoints.pop());
+    redrawCanvas();
+  }
+  utilitiesBtn.innerHTML = "Utilities<br>Undo";
+  undoBtn.innerHTML = undoBtn?.innerHTML ? "✓ Undo" : "Undo";
+  redoBtn.innerHTML = "Redo";
+  clearBtn.innerHTML = "Clear";
+  eraseBtn.innerHTML = "Eraser";
+  document.getElementById("utilities-popout").classList.remove('active');
+});
+
+redoBtn.addEventListener("click", () => {
+  if (redoStack.length) {
+    drawPoints.push(redoStack.pop());
+    redrawCanvas();
+  }
+  utilitiesBtn.innerHTML = "Utilities<br>Redo";
+  redoBtn.innerHTML = redoBtn?.innerHTML ? "✓ Redo" : "Redo";
+  undoBtn.innerHTML = "Undo";
+  clearBtn.innerHTML = "Clear";
+  eraseBtn.innerHTML = "Eraser";
+  document.getElementById("utilities-popout").classList.remove('active');
+});
+
+clearBtn.addEventListener("click", () => {
+  ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  localStorage.setItem("drawPoints", JSON.stringify([]));
+  drawPoints = [];
+  localStorage.clear();
+  utilitiesBtn.innerHTML = "Utilities<br>Clear";
+  clearBtn.innerHTML = clearBtn?.innerHTML ? "✓ Clear" : "Clear";
+  undoBtn.innerHTML = "Undo";
+  redoBtn.innerHTML = "Redo";
+  eraseBtn.innerHTML = "Eraser";
+  document.getElementById("utilities-popout").classList.remove('active');
+});
+
+eraseBtn?.addEventListener("click", () => {
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.lineWidth = strokeSizeSlider.value;
+  utilitiesBtn.innerHTML = "Utilities<br>Eraser";
+  eraseBtn.innerHTML = eraseBtn?.innerHTML ? "✓ Eraser" : "Eraser";
+  undoBtn.innerHTML = "Undo";
+  redoBtn.innerHTML = "Redo";
+  clearBtn.innerHTML = "Clear";
+  document.getElementById("utilities-popout").classList.remove('active');
 });
 
 // Clear
@@ -210,57 +290,78 @@ clashBtn.addEventListener("click", () => switchMode("clash"));
 createRoomBtn.addEventListener("click", () => {
   createRoom();
   const connectCode = document.querySelector("#connect-code");
-  connectCode.style.display = connectCode.style.display === "none" ? "block" : "none";
-  connectCode.style.transition = "display 0.5s";
+  const joinCode = document.querySelector("#join-code");
+  const joinBtn = document.querySelector("#join-btn");
+  if (connectCode) {
+    connectCode.style.display =
+      connectCode.style.display === "none" ? "block" : "none";
+    connectCode.style.transition = "display 0.5s";
+  }
+  if (joinCode) joinCode.style.display = "none";
+  if (joinBtn) joinBtn.style.display = "none";
 });
 joinBtn.addEventListener("click", () => {
   joinRoom();
   const joinCode = document.querySelector("#join-code");
-  joinCode.style.display = joinCode.style.display === "none" ? "block" : "none";
-  joinCode.style.transition = "display 0.5s";
+  const connectCode = document.querySelector("#connect-code");
+  const connectBtn = document.querySelector("#connect-btn");
+  if (joinCode) {
+    joinCode.style.display =
+      joinCode.style.display === "none" ? "block" : "none";
+    joinCode.style.transition = "display 0.5s";
+  }
+  if (connectCode) connectCode.style.display = "none";
+  if (connectBtn) connectBtn.style.display = "none";
 });
 shareCode.addEventListener("keyup", () => {
   const connectBtn = document.querySelector("#connect-btn");
-  connectBtn.style.display = shareCode.value.length > 1 ? "block" : "none";
-  connectBtn.style.transition = "display 0.5s";
-  if (shareCode.value.length >= 0) {
-    joinCode.style.display = "none";
-    document.querySelector('#join-btn').style.display = "none";
+  if (connectBtn) {
+    connectBtn.style.display = shareCode.value.length != 0 ? "block" : "none";
+    connectBtn.style.transition = "display 0.5s";
+  }
+  if (shareCode.value.length > 0) {
+    const joinCode = document.querySelector("#join-code");
+    const joinBtn = document.querySelector("#join-btn");
+    if (joinCode) joinCode.style.display = "none";
+    if (joinBtn) joinBtn.style.display = "none";
   }
 });
 joinCode.addEventListener("keyup", () => {
   const joinBtn = document.querySelector("#join-btn");
-  joinBtn.style.display = joinCode.value.length > 1 ? "block" : "none";
-  joinBtn.style.transition = "display 0.5s";
-  if (joinCode.value.length >= 0) {
-    shareCode.style.display = "none";
-    document.querySelector('#connect-btn').style.display = "none";
+  if (joinBtn) {
+    joinBtn.style.display = joinCode.value.length != 0 ? "block" : "none";
+    joinBtn.style.transition = "display 0.5s";
+  }
+  if (joinCode.value.length > 0) {
+    const shareCode = document.querySelector("#share-code");
+    const connectBtn = document.querySelector("#connect-btn");
+    if (shareCode) shareCode.style.display = "none";
+    if (connectBtn) connectBtn.style.display = "none";
   }
 });
-document.querySelector('#connect-btn').addEventListener("click", () => {
+document.querySelector("#connect-btn").addEventListener("click", () => {
   const connectCode = document.querySelector("#connect-code");
-  console.log(connectCode.value); 
+  console.log(connectCode.value);
   if (connectCode.value.length > 1) {
     try {
+      console.log("create room");
       createRoom();
       connectCode.style.display = "none";
       connectBtn.style.display = "none";
-      document.querySelector('#create-btn').style.display = "none";
     } catch (error) {
       console.warn("Failed to create room: ", error);
     }
   }
 });
-document.querySelector('#join-btn').addEventListener("click", () => {
+document.querySelector("#join-btn").addEventListener("click", () => {
   const joinCode = document.querySelector("#join-code");
-  console.log(joinCode.value)
+  console.log(joinCode.value);
   if (joinCode.value.length > 1) {
     try {
-      console.log("join room")
+      console.log("join room");
       joinRoom();
       joinCode.style.display = "none";
-      joinBtn.style.display = "none";
-      document.querySelector('#join-btn').style.display = "none";
+      document.querySelector("#join-btn").style.display = "none";
     } catch (error) {
       console.warn("Failed to join room: ", error);
     }

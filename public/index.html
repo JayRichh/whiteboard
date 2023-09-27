@@ -9,8 +9,18 @@
       type="image/x-icon"
       title="banananananana"
     />
+    <style>
+      .fade-in {
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+      }
+    </style>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="reset.css" />
+    <link
+      rel="stylesheet"
+      href="https://assets.ubuntu.com/v1/vanilla-framework-version-4.3.0.min.css"
+    />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css"
@@ -22,7 +32,12 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.es5.min.js"></script>
   </head>
-  <body>
+  <body class="fade-in">
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.style.opacity = 1;
+      });
+    </script>
     <div class="header">
       <div class="mode-container">
         <button id="local-btn" class="underline-btn">Local</button>
@@ -113,66 +128,54 @@
         Room:
         <span id="current-room-code"></span>
       </div>
-      <div
-        class="join-container"
-        style="
-          display: none;
-          background-color: #f2f2f2;
-          padding: 10px;
-          border-radius: 5px;
-        "
-      >
-        <button
-          id="create-room-btn"
-          class="btn"
-          style="display: none; margin-bottom: 10px"
-        >
-          Create Room
-        </button>
-        <input
-          type="text"
-          id="connect-code"
-          placeholder="Connection Code"
-          style="display: none; margin-bottom: 10px"
-          title="Type the code you received from a friend to connect to their whiteboard"
-        />
-        <button
-          class="btn"
-          style="display: none; margin-bottom: 10px"
-          id="connect-btn"
-        >
-          Connect
-        </button>
-        <button
-          id="join-room-btn"
-          class="btn"
-          style="display: none; margin-bottom: 10px"
-        >
-          Join Room
-        </button>
-        <input
-          type="text"
-          id="join-code"
-          placeholder="Join Code"
-          style="display: none; margin-bottom: 10px"
-          title="Type a unique code to share with friends and collaborate on the same whiteboard"
-        />
-        <button
-          class="btn"
-          style="display: none; margin-bottom: 10px"
-          id="join-btn"
-        >
-          Join
-        </button>
+      <div class="join-container">
+        <div class="btn-group">
+          <button id="create-room-btn" class="btn" style="display: none">
+            Create Room
+          </button>
+          <input
+            type="text"
+            id="connect-code"
+            placeholder="Connection Code"
+            style="display: none"
+            title="Type the code you received from a friend to connect to their whiteboard"
+          />
+          <button class="btn" style="display: none" id="connect-btn">
+            Connect
+          </button>
+        </div>
+        <div class="btn-group">
+          <button id="join-room-btn" class="btn" style="display: none">
+            Join Room
+          </button>
+          <input
+            type="text"
+            id="join-code"
+            placeholder="Join Code"
+            style="display: none"
+            title="Type a unique code to share with friends and collaborate on the same whiteboard"
+          />
+          <button class="btn" style="display: none" id="join-btn">Join</button>
+        </div>
       </div>
     </div>
     <div class="btn-container">
-      <button id="clear-btn" class="btn">Clear</button>
+      <div class="btn-group">
+        <span id="util-selected"></span>
+        <button id="utilities-btn" class="btn">Utilities</button>
+        <div id="utilities-popout" style="display: none">
+          <button id="undo-btn" class="btn">Undo</button>
+          <button id="redo-btn" class="btn">Redo</button>
+          <button id="clear-btn" class="btn">Clear</button>
+          <button id="eraser-btn" class="btn">Eraser</button>
+        </div>
+        <p id="selected-utility" style="display: none"></p>
+      </div>
       <button id="black-btn" class="btn">Black</button>
       <button id="red-btn" class="btn">Red</button>
       <button id="blue-btn" class="btn">Blue</button>
       <button id="green-btn" class="btn">Green</button>
-      <div id="color-picker"></div>
+      <div id="color-picker" class="pickr"></div>
       <input
         type="range"
         min="1"
@@ -181,17 +184,17 @@
         class="slider"
         id="stroke-size-slider"
       />
-      <select id="stroke-type-dropdown">
+      <select id="stroke-type-dropdown" class="dropdown">
         <option value="round">Round</option>
         <option value="square">Square</option>
         <option value="butt">Butt</option>
       </select>
     </div>
     <canvas id="my-canvas" style="height: 100vh; width: 100vw"></canvas>
-    <script defer src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script type="module" defer src="elementReferences.js"></script>
-    <script type="module" defer src="socketEvents.js"></script>
-    <script type="module" defer src="main.js"></script>
-    <script type="module" defer src="eventListeners.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script type="module" src="elementReferences.js"></script>
+    <script type="module" src="socketEvents.js"></script>
+    <script type="module" src="main.js"></script>
+    <script type="module" src="eventListeners.js"></script>
   </body>
 </html>

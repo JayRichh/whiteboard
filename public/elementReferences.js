@@ -20,12 +20,24 @@ export let collabBtn = document.querySelector("#collab-btn");
 export let guessBtn = document.querySelector("#submit-guess-btn");
 export let gameStartBtn = document.querySelector("#game-start-btn");
 export let gameEndBtn = document.querySelector("#game-end-btn");
+export let eraseBtn = document.querySelector("#eraser-btn");
+export let undoBtn = document.querySelector("#undo-btn");
+export let redoBtn = document.querySelector("#redo-btn");
+export let utilitiesBtn = document.querySelector("#utilities-btn");
 
 // Input
 export let colorPicker = new Pickr({
   el: "#color-picker",
   theme: "classic",
   default: localStorage.getItem("color") || "#000000",
+  defaultRepresentation: "HEX",
+  position: "bottom-start",
+  adjustableNumbers: true,
+  comparison: false,
+  closeWithKey: "Escape",
+  autoReposition: true,
+  padding: 50,
+  appClass: "custom-class",
   swatches: [
     "rgba(244, 67, 54, 1)",
     "rgba(233, 30, 99, 0.95)",
@@ -57,6 +69,59 @@ export let colorPicker = new Pickr({
       save: true,
     },
   },
+  i18n: {
+    "btn:save": "Apply",
+    "btn:cancel": "Cancel",
+  },
+});
+
+colorPicker.on("init", (instance) => {
+  const pickrElement = document.querySelector(".pickr");
+  if (pickrElement) {
+    pickrElement.style.width = "165px";
+    pickrElement.style.height = "70px";
+  }
+
+  const pickerButton = document.querySelector(".pickr .pcr-button");
+  if (pickerButton) {
+    pickerButton.style.height = "100%";
+    pickerButton.style.width = "100%";
+  }
+
+  let pickerApp = document.querySelector(".pcr-app");
+  if (pickerApp) {
+    pickerApp.style.transform = "scale(1.6)";
+  }
+
+  const pickerInput = document.querySelector(".pickr .pcr-result");
+  if (pickerInput) {
+    pickerInput.style.color = "#495057";
+  }
+
+  const pickerSwatches = document.querySelector(".pickr .pcr-swatches");
+  if (pickerSwatches) {
+    pickerSwatches.style.fontSize = "1.5em";
+  }
+
+  const pickerSaveButton = document.querySelector(".pickr .pcr-save");
+  if (pickerSaveButton) {
+    pickerSaveButton.style.backgroundColor = "#4CAF50";
+    pickerSaveButton.style.color = "#ffffff";
+    pickerSaveButton.style.fontSize = "1.2em";
+  }
+
+  const pickerSwatch = document.querySelectorAll(
+    ".pickr .pcr-swatches .pcr-swatch",
+  );
+  if (pickerSwatch) {
+    pickerSwatch.forEach((swatch) => {
+      if (swatch) {
+        swatch.style.width = "40px";
+        swatch.style.height = "40px";
+        swatch.style.margin = "0px";
+      }
+    });
+  }
 });
 export let shareCode = document.querySelector("#connect-code");
 export let joinCode = document.querySelector("#join-code");
@@ -75,6 +140,7 @@ export let scoreDisplay = document.querySelector("#score");
 export let guessesList = document.querySelector("#guesses-list");
 export let promptDisplay = document.querySelector("#prompt");
 export let playersList = document.querySelector("#players-list");
+export let utilSelected = document.querySelector("#util-selected");
 
 // Setup
 canvasElement.style.height = window.innerHeight + "px";
